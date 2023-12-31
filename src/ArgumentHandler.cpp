@@ -67,7 +67,7 @@ ArgumentHandler::ArgumentHandler(int argc, char* argv[]){
 void ArgumentHandler::processArguments(){
     try{
         if (processParameters.empty()){
-            createDefaultProcesses();
+            throw(std::invalid_argument("Process parameters are missing."));
         }
         else{
             createProcesses();
@@ -77,28 +77,6 @@ void ArgumentHandler::processArguments(){
     catch (std::invalid_argument& msg){
         throw std::invalid_argument(msg.what());
     }
-}
-
-void ArgumentHandler::createDefaultProcesses(){
-    std::shared_ptr<Process> p1 = std::make_shared<Process>("p1", 0, 22, 0);
-    std::shared_ptr<Process> p2 = std::make_shared<Process>("p2", 0, 2, 0);
-    std::shared_ptr<Process> p3 = std::make_shared<Process>("p3", 4, 3, 0);
-    std::shared_ptr<Process> p4 = std::make_shared<Process>("p4", 4, 5, 0);
-    std::shared_ptr<Process> p5 = std::make_shared<Process>("p5", 4, 8, 0);
-
-
-    processes.push_back(p1);
-    processes.push_back(p2);
-    processes.push_back(p3);
-    processes.push_back(p4);
-    processes.push_back(p5);
-
-
-    //printing initial process details
-    std::cout << std::endl << "--------------------------------------------------" << std::endl;
-    std::cout << "Initial state" << std::endl;
-    std::cout << "--------------------------------------------------" << std::endl;
-    printProcesses(processes);
 }
 
 void ArgumentHandler::createProcesses(){
@@ -134,25 +112,33 @@ void ArgumentHandler::createProcesses(){
 
 void ArgumentHandler::simulateScheduling(){
     bool invalidArg = 1;
+    std::vector<std::thread> threads;
+
     if (strategy.empty()){
         invalidArg = 0;
 
-        FCFS fcfs(processes, preemptive);
-        SJF sjf(processes, preemptive);
-        EDF edf(processes, preemptive);
-        LLF llf(processes, preemptive);
-        RoundRobin rr(processes, quantum);
-
-        //printing results of different scheduling strategies
-        printResults("FCFS", fcfs);
-        printResults("SJF", sjf);
-        printResults("EDF", edf);
-        printResults("LLF", llf);
-        printResults("Round Robin", rr);
+        threads.emplace_back([&] {
+            FCFS fcfs(processes, preemptive);
+            printResults("FCFS", fcfs);
+        });
+        threads.emplace_back([&] {
+            SJF sjf(processes, preemptive);
+            printResults("SJF", sjf);
+        });
+        threads.emplace_back([&] {
+            EDF edf(processes, preemptive);
+            printResults("EDF", edf);
+        });
+        threads.emplace_back([&] {
+            LLF llf(processes, preemptive);
+            printResults("LLF", llf);
+        });
+        threads.emplace_back([&] {
+            RoundRobin rr(processes, quantum);
+            printResults("Round Robin", rr);
+        });
     }
     else{
-        std::vector<std::thread> threads;
-
         if(strategy.contains("FCFS")){
             invalidArg = 0;
             threads.emplace_back([&] {
@@ -188,11 +174,10 @@ void ArgumentHandler::simulateScheduling(){
                 printResults("Round Robin", rr);
             });
         }
-
-        for (auto& thread : threads){
-            thread.join();
-        }
     }
+    for (auto& thread : threads){
+        thread.join();
+     }   
     if(invalidArg){
         throw std::invalid_argument("Invalid Argument following -s");
     }
@@ -205,7 +190,7 @@ void ArgumentHandler::printHelp(){
     std::cout << "Description:" << std::endl;
     std::cout << "\tCalculating the average response time of processes using different scheduling strategies." << std::endl << std::endl;
     std::cout << "\t-h\tDisplay this help." << std::endl;
-    std::cout << "\t-p\tSpecify one or multiple processes. Followed by [process name] [ready time] [execution time] [deadline]. \n\t\tYou may add as many processes as you like. If not specified, example processes are used." << std::endl;
+    std::cout << "\t-p\tSpecify one or multiple processes. Followed by [process name] [ready time] [execution time] [deadline]. \n\t\tYou may add as many processes as you like. This option is mandatory." << std::endl;
     std::cout << "\t-q\tSet a quantum for Round Robin. Default is 2 if omitted." << std::endl;
     std::cout << "\t-s\tSpecify one or multiple scheduling strategies separated by comma. \n\t\tPossible strategies: FCFS,SJF,EDF,LLF,RoundRobin. If not specified, all of them are selected." << std::endl << std::endl;
     std::cout << "\t--preemptive\tActivate preemtive mode for the scheduling strategies." << std::endl << std::endl ;
@@ -230,11 +215,13 @@ void ArgumentHandler::printProcesses(const std::vector<std::shared_ptr<Process>>
 }
 
 void ArgumentHandler::printResults(std::string strategy, schedulingStrategy& obj){
+    std::lock_guard<std::mutex> lock(resultsMutex); //lock the mutex
     std::cout << std::endl << "--------------------------------------------------" << std::endl;
     std::cout << strategy << std::endl;
     std::cout << "--------------------------------------------------" << std::endl;
     printProcesses(obj.getProcesses());
     std::cout << "Average response time: " << obj.getAvgResponseTime() << std::endl;
+    //mutex is automatically released when 'lock' goes out of scope
 }
 
 int main(int argc, char* argv[]){

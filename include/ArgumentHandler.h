@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <mutex>
 
 #include "CustomProcess.h"
 #include "schedulingStrategy.h"
@@ -13,6 +14,7 @@ private:
     std::vector<std::shared_ptr<Process>> processes;
     int quantum;
     bool preemptive;
+    std::mutex resultsMutex;
 
     void createDefaultProcesses();
     void createProcesses();
