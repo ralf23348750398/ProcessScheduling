@@ -16,5 +16,4 @@ scheduling -h
 ```
 
 ## Requirements
-git
-cmake
+git\ncmake
