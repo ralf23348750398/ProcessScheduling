@@ -16,7 +16,6 @@ private:
     bool preemptive;
     std::mutex resultsMutex;
 
-    void createDefaultProcesses();
     void createProcesses();
     void simulateScheduling();
     void printProcesses(const std::vector<std::shared_ptr<Process>>& proc) const;
