@@ -1,6 +1,6 @@
 #include "RoundRobin.h"
 #include "schedulingStrategy.h"
-#include "Process.h"
+#include "CustomProcess.h"
 
 #include <algorithm>
 

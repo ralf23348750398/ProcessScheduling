@@ -1,6 +1,6 @@
 #include "SJF.h"
 #include "schedulingStrategy.h"
-#include "Process.h"
+#include "CustomProcess.h"
 
 #include <algorithm>
 

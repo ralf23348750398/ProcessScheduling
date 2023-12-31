@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "Process.h"
+#include "CustomProcess.h"
 
 class schedulingStrategy{
 private:

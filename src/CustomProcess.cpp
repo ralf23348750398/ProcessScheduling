@@ -1,4 +1,4 @@
-#include "Process.h"
+#include "CustomProcess.h"
 
 Process::Process(std::string n, int r, int e, int d){
     name=n;

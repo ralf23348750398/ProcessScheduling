@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(scheduling 
                 src/ArgumentHandler.cpp
-                src/Process.cpp
+                src/CustomProcess.cpp
                 src/schedulingStrategy.cpp
                 src/SJF.cpp
                 src/EDF.cpp

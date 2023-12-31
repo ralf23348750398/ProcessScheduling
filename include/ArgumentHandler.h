@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 
-#include "Process.h"
+#include "CustomProcess.h"
 #include "schedulingStrategy.h"
 
 class ArgumentHandler{

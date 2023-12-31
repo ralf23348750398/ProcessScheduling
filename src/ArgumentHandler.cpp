@@ -1,4 +1,5 @@
 #include <string>
+#include <thread>
 
 #include "ArgumentHandler.h"
 #include "SJF.h"
@@ -150,30 +151,46 @@ void ArgumentHandler::simulateScheduling(){
         printResults("Round Robin", rr);
     }
     else{
+        std::vector<std::thread> threads;
+
         if(strategy.contains("FCFS")){
             invalidArg = 0;
-            FCFS fcfs(processes, preemptive);
-            printResults("FCFS", fcfs);
+            threads.emplace_back([&] {
+                FCFS fcfs(processes, preemptive);
+                printResults("FCFS", fcfs);
+            });
         }
         if(strategy.contains("SJF")){
             invalidArg = 0;
-            SJF sjf(processes, preemptive);
-            printResults("SJF", sjf);
+            threads.emplace_back([&] {
+                SJF sjf(processes, preemptive);
+                printResults("SJF", sjf);
+            });
         }
         if(strategy.contains("EDF")){
             invalidArg = 0;
-            EDF edf(processes, preemptive);
-            printResults("EDF", edf);
+            threads.emplace_back([&] {
+                EDF edf(processes, preemptive);
+                printResults("EDF", edf);
+            });
         }
         if(strategy.contains("LLF")){
             invalidArg = 0;
-            LLF llf(processes, preemptive);
-            printResults("LLF", llf);
+            threads.emplace_back([&] {
+                LLF llf(processes, preemptive);
+                printResults("LLF", llf);
+            });
         }
         if(strategy.contains("RoundRobin")){
             invalidArg = 0;
-            RoundRobin rr(processes, quantum);
-            printResults("Round Robin", rr);
+            threads.emplace_back([&] {
+                RoundRobin rr(processes, quantum);
+                printResults("Round Robin", rr);
+            });
+        }
+
+        for (auto& thread : threads){
+            thread.join();
         }
     }
     if(invalidArg){
