@@ -62,16 +62,17 @@ ArgumentHandler::ArgumentHandler(int argc, char* argv[]){
             throw std::invalid_argument("Unknown argument");
         }
     }
+    if (processParameters.empty()){
+        throw(std::invalid_argument("Process parameters are missing."));
+    }
+    if (processParameters.size() % 4 != 0){
+        throw std::invalid_argument("Invalid number of arguments following -p");
+    }
 }
 
 void ArgumentHandler::processArguments(){
     try{
-        if (processParameters.empty()){
-            throw(std::invalid_argument("Process parameters are missing."));
-        }
-        else{
-            createProcesses();
-        }
+        createProcesses();
         simulateScheduling();
     }
     catch (std::invalid_argument& msg){
@@ -80,10 +81,6 @@ void ArgumentHandler::processArguments(){
 }
 
 void ArgumentHandler::createProcesses(){
-    if(processParameters.size() % 4 != 0){
-        throw std::invalid_argument("Invalid number of arguments following -p");
-    }
-    
     for (int i = 0; i < processParameters.size()-3; i+=4){
         int readyTime = 0, executionTime = 0, deadline = 0;
         std::string processName = processParameters[i];
@@ -233,6 +230,5 @@ int main(int argc, char* argv[]){
         std::cerr << std::endl << "Error: " << msg.what() << std::endl;
         std::cerr << std::endl << "Use -h to display help" << std::endl << std::endl;
     }
-
     return 0;
 }
